@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard | US Road Accidents</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html" class="back-button">← Back to Home</a>
+    <h1>US Traffic Accidents Dashboard (2016–2023)</h1>
+  </header>
+
+  <main class="dashboard">
+    <section id="chart-top-states" class="chart-container">
+        <h2>Top 10 States by Total Accidents</h2>
+        <svg id="topStatesChart" width="700" height="400"></svg>
+      </section>
+      
+      <section id="chart-trend" class="chart-container">
+        <div class="chart-header">
+          <h2>Yearly Trend of Accidents by Severity</h2>
+          <div id="severity-legend"></div>
+        </div>
+        <svg id="trendChart" width="900" height="400"></svg>
+      </section>
+      
+      <section id="chart-road-type" class="chart-container">
+        <h2>Accident Severity by Road Feature</h2>
+        <svg id="roadTypeChart" width="700" height="450"></svg>
+      </section>      
+      
+  </main>
+
+  <script src="js/dashboard.js"></script>
+
+  <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+</body>
+</html>

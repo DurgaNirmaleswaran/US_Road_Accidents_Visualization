@@ -26,3 +26,112 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
   
+  /* Landing Page Styling */
+body.landing {
+  background: #f1f5f9;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  padding-top: 100px;
+  margin: 0;
+}
+
+.landing-container {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 40px 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.landing-container h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 20px;
+}
+
+.landing-container p {
+  font-size: 1.1rem;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 12px 30px;
+  background-color: #1f2937;
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #374151;
+}
+
+header {
+  background: #1f2937;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #f9fafb;
+  color: #1f2937;
+  padding: 8px 14px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.back-button:hover {
+  background: #e5e7eb;
+}
+
+.tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  pointer-events: none;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.2s ease;
+}
+
+svg {
+  overflow: visible;
+}
+
+.chart-heading {
+  margin-bottom: 0.5rem; 
+  margin-top: 1rem;      
+  text-align: center;
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 30px;
+}
+
+#severity-legend {
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+}
