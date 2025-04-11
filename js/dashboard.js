@@ -4,7 +4,7 @@
 d3.json("data/accidents_cleaned.json").then(data => {
     drawTopStatesBarChart(data);
     drawAccidentTrendsLineChart(data);
-    drawStackedBarByLocationType(data);
+    drawRoadTypeStackedBarChart(data);
   });
   
   // -----------------------------
@@ -217,63 +217,74 @@ d3.json("data/accidents_cleaned.json").then(data => {
   // -----------------------------
   // 3. Stacked Bar Chart — Severity by Road Feature
   // -----------------------------
-  function drawStackedBarByLocationType(data) {
+  // Sample function to draw a stacked bar chart by road feature and severity
+  function drawRoadTypeStackedBarChart(data) {
     const svg = d3.select("#roadTypeChart"),
-          margin = { top: 20, right: 30, bottom: 70, left: 50 },
+          margin = { top: 30, right: 30, bottom: 40, left: 60 },
           width = +svg.attr("width") - margin.left - margin.right,
           height = +svg.attr("height") - margin.top - margin.bottom;
   
+    svg.selectAll("*").remove();
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
   
-    const features = ["Traffic_Signal", "Stop", "Junction", "Highway", "Roundabout", "Railway"];
-    const featureMap = {
-      Traffic_Signal: "Traffic Signal",
-      Stop: "Stop Sign",
-      Junction: "Junction",
-      Highway: "Highway",
-      Roundabout: "Roundabout",
-      Railway: "Railway Cross"
-    };
-  
+    const roadTypes = ["Traffic_Signal", "Stop", "Junction", "Roundabout", "Railway"];
     const severityLevels = [1, 2, 3, 4];
+    const severityLabels = {
+      1: "Minor",
+      2: "Moderate",
+      3: "Serious",
+      4: "Severe"
+    };
+    const color = d3.scaleOrdinal()
+      .domain(severityLevels)
+      .range(["#c7e9c0", "#fdae6b", "#de2d26", "#756bb1"]);
   
-    const grouped = features.map(f => {
-      const group = data.filter(d => d[f] === true);
-      const entry = { feature: featureMap[f] };
+    // Tooltip
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("position", "absolute")
+      .style("padding", "8px 12px")
+      .style("background", "#333")
+      .style("color", "#fff")
+      .style("border-radius", "4px")
+      .style("font-size", "12px")
+      .style("pointer-events", "none")
+      .style("opacity", 0);
+  
+    // Prepare data
+    const featureData = roadTypes.map(type => {
+      const filtered = data.filter(d => d[type] === true);
+      const counts = {};
       severityLevels.forEach(s => {
-        entry[s] = group.filter(d => +d.Severity === s).length;
+        counts[s] = filtered.filter(d => d.Severity === s).length;
       });
-      return entry;
+      counts.total = severityLevels.reduce((sum, s) => sum + counts[s], 0);
+      return { type, ...counts };
     });
   
     const stack = d3.stack().keys(severityLevels);
-    const stackedData = stack(grouped);
+    const stackedSeries = stack(featureData);
   
     const x = d3.scaleBand()
-                .domain(grouped.map(d => d.feature))
-                .range([0, width])
-                .padding(0.3);
+      .domain(roadTypes)
+      .range([0, width])
+      .padding(0.2);
   
     const y = d3.scaleLinear()
-                .domain([0, d3.max(grouped, d => severityLevels.reduce((sum, s) => sum + d[s], 0))])
-                .nice()
-                .range([height, 0]);
+      .domain([0, d3.max(featureData, d => d.total)])
+      .nice()
+      .range([height, 0]);
   
-    const color = d3.scaleOrdinal()
-                    .domain(severityLevels)
-                    .range(d3.schemeSet2);
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",")));
   
     g.append("g")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x))
-      .selectAll("text")
-      .attr("transform", "rotate(-30)")
-      .style("text-anchor", "end");
+      .call(d3.axisBottom(x).tickFormat(d => d.replace("_", " ")));
   
-    g.append("g").call(d3.axisLeft(y));
-  
-    g.selectAll(".layer")
-      .data(stackedData)
+    // Bars with transition and tooltips
+    g.selectAll("g.layer")
+      .data(stackedSeries)
       .enter()
       .append("g")
       .attr("fill", d => color(d.key))
@@ -281,9 +292,45 @@ d3.json("data/accidents_cleaned.json").then(data => {
       .data(d => d)
       .enter()
       .append("rect")
-      .attr("x", d => x(d.data.feature))
+      .attr("x", d => x(d.data.type))
+      .attr("y", height)
+      .attr("height", 0)
+      .attr("width", x.bandwidth())
+      .on("mouseover", function (event, d) {
+        const severity = d3.select(this.parentNode).datum().key;
+        tooltip.transition().duration(200).style("opacity", 0.95);
+        tooltip.html(
+          `<strong>${d.data.type.replace("_", " ")}</strong><br/>
+           <strong>Severity:</strong> ${severityLabels[severity]}<br/>
+           <strong>Count:</strong> ${d[1] - d[0]}`
+        )
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", () => tooltip.transition().duration(300).style("opacity", 0))
+      .transition()
+      .duration(800)
       .attr("y", d => y(d[1]))
-      .attr("height", d => y(d[0]) - y(d[1]))
-      .attr("width", x.bandwidth());
+      .attr("height", d => y(d[0]) - y(d[1]));
+  
+    // Legend
+    const legend = svg.append("g")
+      .attr("transform", `translate(${width + margin.left - 30}, ${margin.top})`);
+  
+    severityLevels.forEach((s, i) => {
+      legend.append("rect")
+        .attr("x", 0)
+        .attr("y", i * 18)
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", color(s));
+  
+      legend.append("text")
+        .attr("x", 18)
+        .attr("y", i * 18 + 10)
+        .text(severityLabels[s])
+        .style("font-size", "12px")
+        .attr("alignment-baseline", "middle");
+    });
   }
   

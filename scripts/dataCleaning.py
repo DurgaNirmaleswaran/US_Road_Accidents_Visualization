@@ -11,8 +11,14 @@ csv_file = os.path.join(kaggle_path, "US_Accidents_March23.csv")
 
 # Load and clean the data
 df = pd.read_csv(csv_file, nrows=100000)
-df = df[['ID', 'Start_Time', 'City', 'State', 'Severity', 'Weather_Condition']]
-df = df.dropna(subset=['Start_Time', 'City', 'State', 'Severity'])
+df = df[[
+    'ID', 'Start_Time', 'City', 'State', 'Severity', 'Weather_Condition',
+    'Traffic_Signal', 'Stop', 'Junction', 'Roundabout', 'Railway'
+]]
+df = df.dropna(subset=[
+    'Start_Time', 'City', 'State', 'Severity',
+    'Traffic_Signal', 'Stop', 'Junction', 'Roundabout', 'Railway'
+])
 df['Date'] = pd.to_datetime(df['Start_Time']).dt.date
 
 # Save cleaned JSON to your local project data folder
