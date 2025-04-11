@@ -4,7 +4,7 @@ import os
 
 # Downloading dataset
 kaggle_path = kagglehub.dataset_download("sobhanmoosavi/us-accidents")
-print("📥 Dataset downloaded to:", kaggle_path)
+print("Dataset downloaded to:", kaggle_path)
 
 # Reading the CSV file
 csv_file = os.path.join(kaggle_path, "US_Accidents_March23.csv")

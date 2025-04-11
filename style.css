@@ -135,3 +135,37 @@ svg {
   border-radius: 6px;
   box-shadow: 0 0 4px rgba(0,0,0,0.1);
 }
+
+.tab-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 40px;
+}
+
+.tab-card {
+  background: #1f2937;
+  color: white;
+  text-decoration: none;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 260px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.tab-card:hover {
+  background: #374151;
+  transform: translateY(-4px);
+}
+
+.tab-card p {
+  font-weight: normal;
+  font-size: 0.95rem;
+  color: #d1d5db;
+  margin-top: 0.75rem;
+}
