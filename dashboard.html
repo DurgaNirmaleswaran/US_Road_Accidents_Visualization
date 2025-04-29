@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard | US Road Accidents</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
   <header>
@@ -12,54 +12,88 @@
     <h1>US Traffic Accidents Dashboard (2016–2023)</h1>
   </header>
 
-  <main class="dashboard">
+  <main class="dashboard-container">
+  
     <div id="tab1" class="tab-content">
-      <section id="chart-top-states" class="chart-container">
-        <h2>Top 10 States by Total Accidents</h2>
-        <svg id="topStatesChart" width="700" height="400"></svg>
-      </section>
+      <div class="charts-container">
+        <section id="chart-top-states-pie" class="chart-card">
+          <h2>Top 10 States by Total Accidents (Bar Chart)</h2>
+          <svg id="topStatesChart" width="500" height="400"></svg>
+        </section>
+        
+        <section id="chart-top-states-pie" class="chart-card">
+          <h2>Top 10 States by Total Accidents (Pie Chart)</h2>
+          <svg id="topStatesPieChart" width="400" height="400"></svg>
+        </section>
+      </div>
     </div>
   
     <div id="tab2" class="tab-content" style="display: none;">
-      <section id="chart-trend" class="chart-container">
-        <div class="chart-header">
+      <div class="charts-container">
+        <section id="chart-trend" class="chart-card">
           <h2>Yearly Trend of Accidents by Severity</h2>
           <div id="severity-legend"></div>
-        </div>
-        <svg id="trendChart" width="900" height="400"></svg>
-      </section>
+          <svg id="trendChart" width="900" height="400"></svg>
+        </section>
+      </div>
     </div>
   
     <div id="tab3" class="tab-content" style="display: none;">
-      <section id="chart-road-type" class="chart-container">
-        <h2>Accident Severity by Road Feature</h2>
-        <svg id="roadTypeChart" width="900" height="450"></svg>
-      </section>
+      <div class="charts-container">
+        <section id="chart-road-type" class="chart-card">
+          <h2>Accident Severity by Road Feature</h2>
+          <svg id="roadTypeChart" width="900" height="450"></svg>
+        </section>
+      </div>
     </div>
+  
+    <aside class="filter-sidebar">
+      <h3>Filters</h3>
+  
+      <label for="startDate">Start Date:</label>
+      <select id="startDate"></select>
+  
+      <label for="endDate">End Date:</label>
+      <select id="endDate"></select>
+  
+      <label for="severity">Severity:</label>
+      <select id="severity">
+        <option value="">All Severities</option>
+        <option value="1">Minor (1)</option>
+        <option value="2">Moderate (2)</option>
+        <option value="3">Serious (3)</option>
+        <option value="4">Severe (4)</option>
+      </select>
+  
+      <button id="resetFilters" class="reset-button">Reset Filters</button>
+    </aside>
+  
   </main>
   
-
-  <script src="js/dashboard.js"></script>
-
   <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
-
-
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="js/dashboard.js"></script>
+  <div id="pie-tooltip" class="tooltip" style="opacity: 0;"></div>
   
+  <script src="js/dashboard.js"></script>
+
   <script>
     function showTab(tabId) {
       const tabs = document.querySelectorAll(".tab-content");
       tabs.forEach(tab => tab.style.display = "none");
+  
       const target = document.getElementById(tabId);
       if (target) target.style.display = "block";
     }
   
-    // Automatically open tab based on URL hash
     window.addEventListener("DOMContentLoaded", () => {
       const hash = window.location.hash || "#tab1";
       showTab(hash.substring(1));
+  
+      window.addEventListener("hashchange", () => {
+        const hash = window.location.hash || "#tab1";
+        showTab(hash.substring(1));
+      });
     });
   </script>
+  
 </body>
 </html>

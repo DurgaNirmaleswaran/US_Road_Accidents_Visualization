@@ -1,15 +1,90 @@
-// dashboard.js — Contains all 3 final visualizations
+/// dashboard.js — Updated for full filter support across all visualizations
 
-// Load the data from JSON file
+let originalData; // Store the full dataset globally
+
+// Load the data initially
 d3.json("data/accidents_cleaned.json").then(data => {
-    drawTopStatesBarChart(data);
-    drawAccidentTrendsLineChart(data);
-    drawRoadTypeStackedBarChart(data);
+  originalData = data;
+  initializeFilters(data); 
+  updateVisualizations(data);
+});
+
+function initializeFilters(data) {
+  const dates = data.map(d => new Date(d.Start_Time));
+  const months = [...new Set(dates.map(d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')))].sort();
+
+  const formatMonth = d => {
+    const [year, month] = d.split("-");
+    const date = new Date(year, month - 1);
+    return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+  };
+
+  // Populate Start Date
+  const startSelect = d3.select("#startDate");
+  months.forEach(m => {
+    startSelect.append("option")
+      .attr("value", m)
+      .text(formatMonth(m));
   });
+
+  // Populate End Date
+  const endSelect = d3.select("#endDate");
+  months.forEach(m => {
+    endSelect.append("option")
+      .attr("value", m)
+      .text(formatMonth(m));
+  });
+
+  // Set default selection
+  startSelect.property("value", months[0]);
+  endSelect.property("value", months[months.length - 1]);
+}
+
+
+// Set up event listeners for filters
+d3.selectAll("#startDate, #endDate, #severity").on("change", applyFilters);
+
+// Reset Filters Functionality
+d3.select("#resetFilters").on("click", () => {
+  // Reset dropdowns to default values
+  d3.select("#startDate").property("selectedIndex", 0);
+  d3.select("#endDate").property("selectedIndex", d3.select("#endDate").selectAll("option").size() - 1);
+  d3.select("#severity").property("value", "");
+
+  // Reapply filters (which now are reset)
+  applyFilters();
+});
+
+
+// Function to update all visualizations with filtered data
+function updateVisualizations(filteredData) {
+  drawTopStatesBarChart(filteredData);
+  drawTopStatesPieChart(filteredData);
+  drawAccidentTrendsLineChart(filteredData);
+  drawRoadTypeStackedBarChart(filteredData);
+}
+
+// Function to apply filters based on user input
+function applyFilters() {
+  let start = d3.select("#startDate").property("value"); // format "2016-02"
+  let end = d3.select("#endDate").property("value");
+  let severity = d3.select("#severity").property("value");
+
+  let filtered = originalData.filter(d => {
+    let date = new Date(d.Start_Time);
+    let yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+    return (start ? yearMonth >= start : true) &&
+           (end ? yearMonth <= end : true) &&
+           (severity ? d.Severity == severity : true);
+  });
+
+  updateVisualizations(filtered);
+}
   
-  // -----------------------------
+  // -------------------------------------------------
   // 1. Horizontal Bar Chart — Top States by Accidents
-  // -----------------------------
+  // -------------------------------------------------
   function drawTopStatesBarChart(data) {
     const svg = d3.select("#topStatesChart"),
           margin = { top: 20, right: 30, bottom: 40, left: 100 },
@@ -94,6 +169,86 @@ d3.json("data/accidents_cleaned.json").then(data => {
       .text(d => d3.format(",")(d.count));
   }
   
+  // ----------------------------------------
+  // 1. Pie chart — Top States by Accidents
+  // ----------------------------------------
+  function drawTopStatesPieChart(data) {
+    const svg = d3.select("#topStatesPieChart"),
+          margin = { top: 20, right: 30, bottom: 40, left: 30 },
+          width = +svg.attr("width") - margin.left - margin.right,
+          height = +svg.attr("height") - margin.top - margin.bottom,
+          radius = Math.min(width, height) / 2;
+
+    svg.selectAll("*").remove(); // Clear previous pie chart if any
+
+    const g = svg.append("g")
+                 .attr("transform", `translate(${(width / 2) + margin.left}, ${(height / 2) + margin.top})`);
+
+    const stateCounts = d3.rollups(data, v => v.length, d => d.State)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([state, count]) => ({ state, count }));
+
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    const pie = d3.pie()
+                 .value(d => d.count);
+
+    const arc = d3.arc()
+                 .innerRadius(0)
+                 .outerRadius(radius - 10);
+
+    const tooltip = d3.select("#pie-tooltip"); // Select tooltip div
+
+    const arcs = g.selectAll(".arc")
+                  .data(pie(stateCounts))
+                  .enter()
+                  .append("g")
+                  .attr("class", "arc");
+
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", d => color(d.data.state))
+        .on("mouseover", function(event, d) {
+            d3.select(this).attr("opacity", 0.7);
+            tooltip.transition()
+                   .duration(150)
+                   .style("opacity", 1);
+            tooltip.html(`<strong>${d.data.state}</strong><br/>${d.data.count.toLocaleString()} accidents`)
+                   .style("left", (event.pageX + 10) + "px")
+                   .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mousemove", function(event) {
+            tooltip.style("left", (event.pageX + 10) + "px")
+                   .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function() {
+            d3.select(this).attr("opacity", 1);
+            tooltip.transition()
+                   .duration(200)
+                   .style("opacity", 0);
+        });
+
+      // Add group for labels
+      const labels = arcs.append("g")
+        .attr("transform", d => `translate(${arc.centroid(d)})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "9px")
+        .attr("pointer-events", "none");
+
+      // Add state abbreviation
+      labels.append("text")
+        .attr("y", -5) 
+        .text(d => d.data.state)
+        .style("fill", "#000");
+
+      // Add accident count
+      labels.append("text")
+        .attr("y", 10) 
+        .text(d => d.data.count.toLocaleString())
+        .style("fill", "#000")
+        .style("font-size", "7.5px"); 
+}
   
   
   // -----------------------------
