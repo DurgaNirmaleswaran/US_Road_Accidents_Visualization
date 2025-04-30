@@ -7,6 +7,7 @@ d3.json("data/accidents_cleaned.json").then(data => {
   originalData = data;
   initializeFilters(data); 
   updateVisualizations(data);
+  drawStatesYearsGroupedBarChart(data)
 });
 
 function initializeFilters(data) {
@@ -368,6 +369,144 @@ function applyFilters() {
     }).join("<br>");
     d3.select("#severity-legend").html(legendHTML);
   }  
+
+     // -----------------------------
+ // 3. Grouped Bar Chart
+ // -----------------------------
+ function drawStatesYearsGroupedBarChart(data) {
+  const svg = d3.select("#statesYearsChart"),
+        margin = { top: 35, right: 30, bottom: 50, left: 60 },
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom;
+   svg.selectAll("*").remove();
+  const g = svg.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+   // parse Year and force the full range
+  data.forEach(d=> d.Year = new Date(d.Start_Time).getFullYear());
+  const years = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+ 
+   // pick top 5 states overall
+  const topStates = d3.rollups(data, v=> v.length, d=> d.State)
+    .sort((a,b)=> b[1]-a[1])
+    .slice(0,5).map(d=> d[0]);
+   // build year‐state counts
+  const yearStateCounts = years.map(year=>{
+    const byYear = data.filter(d=> d.Year===year);
+    const row = { year };
+    topStates.forEach(st=> row[st] = byYear.filter(d=> d.State===st).length);
+    return row;
+  });
+   // scales
+  const x0 = d3.scaleBand().domain(years).range([0,width]).paddingInner(0.2).paddingOuter(0);
+  const x1 = d3.scaleBand().domain(topStates).range([0, x0.bandwidth()]).padding(0.05);
+  const y  = d3.scaleLinear()
+               .domain([0, d3.max(yearStateCounts, row=> d3.max(topStates, st=> row[st]))])
+               .nice()
+               .range([height,0]);
+   // draw gridlines
+  g.append("g")
+    .attr("class","grid")
+    .call(d3.axisLeft(y)
+      .tickSize(-width)
+      .tickFormat("")
+    )
+    .selectAll("line")
+    .attr("stroke","#ddd")
+    .attr("stroke-dasharray","2,2");
+   // axes
+  g.append("g")
+    .attr("transform",`translate(0,${height})`)
+    .call(d3.axisBottom(x0).tickFormat(d3.format("d")).tickSizeOuter(0))
+    .selectAll("text")
+      .attr("dy","1em");
+ 
+   g.append("g")
+    .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",")));
+   // color scale (Tableau 10 is OK, or try d3.schemeSet2, etc.)
+  const color = d3.scaleOrdinal()
+    .domain(topStates)
+    .range(d3.schemeSet2);
+   // tooltip
+  const tooltip = d3.select("body").append("div")
+      .attr("class","tooltip")
+      .style("position","absolute")
+      .style("pointer-events","none")
+      .style("opacity",0)
+      .style("background","#333")
+      .style("color","#fff")
+      .style("padding","6px")
+      .style("border-radius","4px")
+      .style("font-size","12px");
+   // bars
+  const yearGroups = g.selectAll("g.year")
+  .data(yearStateCounts, d => d.year);
+ // EXIT old years
+yearGroups.exit()
+  .selectAll("rect")
+  .transition()
+    .duration(300)
+    .attr("y", height)
+    .attr("height", 0)
+  .remove();
+ yearGroups.exit()
+  .transition()
+    .delay(350)
+    .remove();
+ // UPDATE + ENTER
+const yearEnter = yearGroups
+  .enter().append("g")
+    .attr("class","year")
+    .attr("transform", d=> `translate(${x0(d.year)},0)`);
+ const allBars = yearEnter
+  .merge(yearGroups)   // ENTER + UPDATE selection
+  .selectAll("rect")
+  .data(d => topStates.map(st => ({ state:st, val:d[st], year:d.year })), d => d.state);
+ // EXIT individual bars
+allBars.exit()
+  .transition()
+    .duration(800)
+    .attr("y", height)
+    .attr("height", 0)
+  .remove();
+ // ENTER new bars
+const barsEnter = allBars.enter()
+  .append("rect")
+    .attr("x",     d => x1(d.state))
+    .attr("width", x1.bandwidth())
+    .attr("y",     height) // start at bottom
+    .attr("height", 0)
+    .attr("fill",  d => d.val>0 ? color(d.state) : "#f0f0f0")
+    .on("mouseover",(e,d)=> {
+      tooltip.html(`<strong>${d.state}</strong><br/>${d.year}: ${d.val}`)
+        .style("left", (e.pageX+8)+"px")
+        .style("top",  (e.pageY-30)+"px")
+        .transition().duration(100).style("opacity",0.9);
+    })
+    .on("mouseout",()=> tooltip.transition().duration(100).style("opacity",0));
+ // ENTER + UPDATE transition
+barsEnter.merge(allBars)
+  .transition()
+    .duration(1400)
+    .delay((d,i) => i * 80)
+    .ease(d3.easeCubicOut)
+    .attr("y",      d => y(d.val))
+    .attr("height", d => height - y(d.val));
+   // build the HTML legend
+  const legendHTML = topStates.map(st=>
+    `<span style="
+        display:inline-block;
+        width:12px; height:12px;
+        background:${color(st)};
+        margin-right:6px;
+        vertical-align:middle;"></span>${st}`
+  ).join("<br/>");
+   // inject & fade in
+  d3.select("#state-legend")
+    .html(legendHTML)
+    .style("opacity",0)
+    .transition().duration(500).style("opacity",1);
+   
+}
   
   
   // -------------------------------------------------

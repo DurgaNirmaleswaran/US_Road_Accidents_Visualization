@@ -22,10 +22,27 @@ body {
   .chart-container {
     background: white;
     padding: 1rem;
+    position: relative; 
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
   
+  .state-legend {
+    position: absolute;        
+    top: 7px;                
+    right: 20px;              
+    width: auto;              
+    max-width: 200px; 
+  }     
+  .legend-box {
+    font-size: 14px;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+    
   /* Landing Page Styling */
 body.landing {
   background: #f1f5f9;
