@@ -62,6 +62,7 @@ function updateVisualizations(filteredData) {
   drawTopStatesPieChart(filteredData);
   drawAccidentTrendsLineChart(filteredData);
   drawRoadTypeStackedBarChart(filteredData);
+  drawRoadFeatureScatterChart(filteredData);
 }
 
 // Function to apply filters based on user input
@@ -369,10 +370,9 @@ function applyFilters() {
   }  
   
   
-  // -----------------------------
+  // -------------------------------------------------
   // 3. Stacked Bar Chart — Severity by Road Feature
-  // -----------------------------
-  // Sample function to draw a stacked bar chart by road feature and severity
+  // -------------------------------------------------
   function drawRoadTypeStackedBarChart(data) {
     const svg = d3.select("#roadTypeChart"),
           margin = { top: 30, right: 30, bottom: 40, left: 60 },
@@ -484,6 +484,86 @@ function applyFilters() {
         .attr("x", 18)
         .attr("y", i * 18 + 10)
         .text(severityLabels[s])
+        .style("font-size", "12px")
+        .attr("alignment-baseline", "middle");
+    });
+  }
+  
+  // ------------------------------------------------
+  // 3. Scatter Plot — Severity by Road Feature
+  // ------------------------------------------------
+  function drawRoadFeatureScatterChart(data) {
+    const svg = d3.select("#roadFeatureScatterChart"),
+          margin = { top: 30, right: 40, bottom: 50, left: 60 },
+          width = +svg.attr("width") - margin.left - margin.right,
+          height = +svg.attr("height") - margin.top - margin.bottom;
+  
+    svg.selectAll("*").remove();
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+  
+    const roadTypes = ["Junction", "Stop", "Roundabout", "Traffic_Signal"];
+    const color = d3.scaleOrdinal()
+      .domain(roadTypes)
+      .range(["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e"]);
+  
+    data.forEach(d => {
+      d.Year = new Date(d.Start_Time).getFullYear();
+    });
+  
+    const years = [...new Set(data.map(d => d.Year))].sort();
+  
+    const featureData = roadTypes.map(type => {
+      return {
+        type,
+        values: years.map(year => {
+          const count = data.filter(d => d.Year === year && d[type] === true).length;
+          return { year, count };
+        })
+      };
+    });
+  
+    const x = d3.scaleLinear()
+                .domain(d3.extent(years))
+                .range([0, width]);
+  
+    const y = d3.scaleLinear()
+                .domain([0, d3.max(featureData.flatMap(d => d.values), v => v.count)])
+                .nice()
+                .range([height, 0]);
+  
+    g.append("g").attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+  
+    g.append("g").call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",")));
+  
+    // Add scatter dots
+    featureData.forEach(feature => {
+      g.selectAll(`.dot-${feature.type}`)
+        .data(feature.values)
+        .enter()
+        .append("circle")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => y(d.count))
+        .attr("r", 4)
+        .attr("fill", color(feature.type))
+        .attr("opacity", 0.8);
+    });
+  
+    // Add legend
+    const legend = svg.append("g")
+      .attr("transform", `translate(${width + 70}, ${margin.top})`);
+  
+    roadTypes.forEach((type, i) => {
+      legend.append("circle")
+        .attr("cx", 0)
+        .attr("cy", i * 20)
+        .attr("r", 6)
+        .attr("fill", color(type));
+  
+      legend.append("text")
+        .attr("x", 10)
+        .attr("y", i * 20 + 5)
+        .text(type.replace("_", " "))
         .style("font-size", "12px")
         .attr("alignment-baseline", "middle");
     });
