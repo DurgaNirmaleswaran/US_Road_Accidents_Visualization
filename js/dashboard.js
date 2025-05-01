@@ -1,4 +1,3 @@
-/// dashboard.js — Updated for full filter support across all visualizations
 
 let originalData; // Store the full dataset globally
 
@@ -40,9 +39,34 @@ function initializeFilters(data) {
   endSelect.property("value", months[months.length - 1]);
 }
 
+// Live Date Validation
+function validateDateRange() {
+  const start = d3.select("#startDate").property("value");
+  const end = d3.select("#endDate").property("value");
 
-// Set up event listeners for filters
-d3.selectAll("#startDate, #endDate, #severity").on("change", applyFilters);
+  const startSelect = document.getElementById("startDate");
+  const endSelect = document.getElementById("endDate");
+
+  if (start > end) {
+    alert("⚠️ Start date cannot be after end date.");
+    startSelect.style.border = "2px solid red";
+    endSelect.style.border = "2px solid red";
+    return false;
+  } else {
+    startSelect.style.border = "";
+    endSelect.style.border = "";
+    return true;
+  }
+}
+
+// Attach live validation and filtering
+d3.select("#startDate").on("change", () => {
+  if (validateDateRange()) applyFilters();
+});
+d3.select("#endDate").on("change", () => {
+  if (validateDateRange()) applyFilters();
+});
+d3.select("#severity").on("change", applyFilters);
 
 // Reset Filters Functionality
 d3.select("#resetFilters").on("click", () => {
@@ -51,10 +75,32 @@ d3.select("#resetFilters").on("click", () => {
   d3.select("#endDate").property("selectedIndex", d3.select("#endDate").selectAll("option").size() - 1);
   d3.select("#severity").property("value", "");
 
-  // Reapply filters (which now are reset)
+  // Clear error borders
+  document.getElementById("startDate").style.border = "";
+  document.getElementById("endDate").style.border = "";
+
   applyFilters();
 });
 
+// Function to apply filters based on user input
+function applyFilters() {
+  if (!validateDateRange()) return;
+
+  let start = d3.select("#startDate").property("value");
+  let end = d3.select("#endDate").property("value");
+  let severity = d3.select("#severity").property("value");
+
+  let filtered = originalData.filter(d => {
+    let date = new Date(d.Start_Time);
+    let yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+    return (start ? yearMonth >= start : true) &&
+           (end ? yearMonth <= end : true) &&
+           (severity ? d.Severity == severity : true);
+  });
+
+  updateVisualizations(filtered);
+}
 
 // Function to update all visualizations with filtered data
 function updateVisualizations(filteredData) {
