@@ -7,7 +7,6 @@ d3.json("data/accidents_cleaned.json").then(data => {
   originalData = data;
   initializeFilters(data); 
   updateVisualizations(data);
-  drawStatesYearsGroupedBarChart(data)
 });
 
 function initializeFilters(data) {
@@ -62,6 +61,7 @@ function updateVisualizations(filteredData) {
   drawTopStatesBarChart(filteredData);
   drawTopStatesPieChart(filteredData);
   drawAccidentTrendsLineChart(filteredData);
+  drawStatesYearsGroupedBarChart(filteredData);
   drawRoadTypeStackedBarChart(filteredData);
   drawRoadFeatureScatterChart(filteredData);
 }
@@ -253,9 +253,9 @@ function applyFilters() {
 }
   
   
-  // -----------------------------
+  // -------------------------------------
   // 2. Multi-Line Chart — Trends by Year
-  // -----------------------------
+  // -------------------------------------
   function drawAccidentTrendsLineChart(data) {
     const svg = d3.select("#trendChart"),
           margin = { top: 30, right: 30, bottom: 40, left: 60 },
@@ -370,9 +370,9 @@ function applyFilters() {
     d3.select("#severity-legend").html(legendHTML);
   }  
 
-     // -----------------------------
- // 3. Grouped Bar Chart
- // -----------------------------
+ // --------------------------------------
+ // 2. Grouped Bar Chart - Trends by Year
+ // --------------------------------------
  function drawStatesYearsGroupedBarChart(data) {
   const svg = d3.select("#statesYearsChart"),
         margin = { top: 35, right: 30, bottom: 50, left: 60 },
