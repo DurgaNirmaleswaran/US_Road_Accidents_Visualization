@@ -4,30 +4,40 @@
   <meta charset="UTF-8" />
   <title>US Road Accidents Project</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script> <!-- Required for D3 -->
 </head>
 <body class="landing">
   <div class="landing-container">
+
     <h1>🚗 US Road Accidents (2016–2023)</h1>
     <p>
       This project explores traffic accident patterns across the United States from 2016 to 2023.<br/>
       Using interactive visualizations, we dive into trends by severity, weather, time, and location.
     </p>
-    <div class="tab-links">
+
+    <div class="heatmap-wrapper">
+      <svg id="heatmap" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="tab-links" style="margin-top: 2rem;">
       <a href="dashboard.html#tab1" class="tab-card">
         🚩 Top States
         <p>See which states reported the most road accidents from 2016 to 2023.</p>
       </a>
-    
+
       <a href="dashboard.html#tab2" class="tab-card">
         📈 Severity Trend
         <p>View how severity levels evolved over the years.</p>
       </a>
-    
+
       <a href="dashboard.html#tab3" class="tab-card">
         🛣️ Road Features
         <p>Explore accident severity across traffic structures.</p>
       </a>
-    </div>    
+    </div>
+
   </div>
+
+  <script src="js/heatmap.js"></script>
 </body>
 </html>
