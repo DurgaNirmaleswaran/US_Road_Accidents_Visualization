@@ -60,19 +60,21 @@ From the project root <br>
 python3 -m http.server <br>
 Then visit http://localhost:8000/index.html in your browser. <br>
 
-### Features
+##  Project Links
 
-    1) Three fully interactive visualizations using D3.js 
-    2) Animated chart transitions and responsive tooltips
-    3) Tab-based navigation within the dashboard 
-    4) Clean, modular code structure for easy updates and expansion 
+- **Live Website**: [US Road Accidents Visualization](https://vishnu-vj.github.io/US_Road_Accidents_Visualization/index.html)
+- **Screencast Video**: [Watch on YouTube](https://youtu.be/rbbCnAzQvYM)
 
-### Notes and Future Plans
 
-The visualizations currently use a sample of 100,000 rows to ensure performance and quick loading.
-The full dataset is much larger and may be integrated using advanced data handling methods in the future.
-Filtering options by state, year, or severity are planned for upcoming updates.
-The current implementation aligns with the final proposal but is subject to changes and improvements based on feedback and usability testing.
+
+## Notable UI Features
+
+- Responsive **filter panel** (date range and severity dropdown)
+- Multi-tab **dashboard navigation** with persistent context
+- Three fully interactive visualizations using D3.js 
+- **Hover tooltips** on all visual elements and animated chart transitions
+- Clean, responsive layout and color themes for accessibility
+
 
 ### Requirements
 
