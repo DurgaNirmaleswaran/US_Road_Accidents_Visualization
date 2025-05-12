@@ -65,7 +65,20 @@ Then visit http://localhost:8000/index.html in your browser. <br>
 - **Live Website**: [US Road Accidents Visualization](https://vishnu-vj.github.io/US_Road_Accidents_Visualization/index.html)
 - **Screencast Video**: [Watch on YouTube](https://youtu.be/rbbCnAzQvYM)
 
+## 🎨 Design Evolution
 
+Our project evolved through three structured phases:
+
+- **Proposal Phase**  
+  Initially, we proposed **one visualization per research question** — focusing on heatmaps, bar charts, and time series. However, during the proposal review, it was misunderstood that we would be implementing **three visualizations per question**.
+
+- **Milestone Phase**  
+  We revised our plan to improve clarity and interactivity. We removed heatmaps due to clutter and introduced clearer bar and line charts. We also modularized the dashboard with tab-based navigation and dynamic filters.
+
+- **Final Submission**  
+  To better support insight discovery, we implemented **two visualizations per research question** (e.g., bar + pie chart for location, line + bar for time trends). This provided a more complete view of each topic while keeping the dashboard lightweight and user-friendly.
+
+📄 For full rationale and sketches, see: `docs/ProcessBook.pdf`
 
 ## Notable UI Features
 
