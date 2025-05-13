@@ -19,7 +19,8 @@ df = df.dropna(subset=[
     'Start_Time', 'City', 'State', 'Severity',
     'Traffic_Signal', 'Stop', 'Junction', 'Roundabout', 'Railway'
 ])
-df['Date'] = pd.to_datetime(df['Start_Time']).dt.date
+df['Date'] = pd.to_datetime(df['Start_Time'], errors='coerce', format='mixed').dt.date
+
 
 # Save cleaned JSON to your local project data folder
 output_file = os.path.join("..", "data", "accidents_cleaned.json")
