@@ -1,6 +1,6 @@
 Promise.all([
     d3.json("data/us-states.geojson"),
-    d3.json("data/accidents_cleaned.json")
+    d3.json("https://github.com/Vishnu-vj/US_Road_Accidents_Visualization/releases/download/v2.0.0/accidents_cleaned.json")
   ]).then(([us, data]) => {
     const width = 960, height = 600;
     const svg = d3.select("#heatmap");
