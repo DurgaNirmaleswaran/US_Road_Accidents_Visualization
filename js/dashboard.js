@@ -2,7 +2,7 @@
 let originalData; // Store the full dataset globally
 
 // Load the data initially
-d3.json("https://github.com/Vishnu-vj/US_Road_Accidents_Visualization/releases/download/v2.0.0/accidents_cleaned.json").then(data => {
+d3.json("data/accidents_cleaned.json").then(data => {
   originalData = data;
   initializeFilters(data); 
   updateVisualizations(data);
